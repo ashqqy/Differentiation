@@ -1,0 +1,7 @@
+digraph G
+{
+node[shape="record", style="rounded, filled"];
+
+p0x55e6597ee2a0[label = "{ <par>parent = (nil) | <ptr>ptr = 0x55e6597ee2a0 | <d>0| { <l>left = (nil)|<r>right = (nil)} }"];
+
+}
