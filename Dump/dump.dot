@@ -2,22 +2,10 @@ digraph G
 {
 node[shape="record", style="rounded, filled"];
 
-p0x55b1344dd420[label = "{ <ptr> 0x55b1344dd420 |<type> OP | <data>/| { <l>left|<r>right } }"];
-p0x55b1344dd360[label = "{ <ptr> 0x55b1344dd360 |<type> OP | <data>*| { <l>left|<r>right } }"];
-p0x55b1344dd300[label = "{ <ptr> 0x55b1344dd300 |<type> OP | <data>-| { <l>left|<r>right } }"];
-p0x55b1344dd2a0[label = "{ <ptr> 0x55b1344dd2a0 |<type> NUM | <data>520.000000| { <l>left|<r>right } }"];
-p0x55b1344dd2d0[label = "{ <ptr> 0x55b1344dd2d0 |<type> NUM | <data>20.000000| { <l>left|<r>right } }"];
-p0x55b1344dd330[label = "{ <ptr> 0x55b1344dd330 |<type> VAR | <data>x| { <l>left|<r>right } }"];
-p0x55b1344dd3f0[label = "{ <ptr> 0x55b1344dd3f0 |<type> OP | <data>*| { <l>left|<r>right } }"];
-p0x55b1344dd390[label = "{ <ptr> 0x55b1344dd390 |<type> NUM | <data>50.000000| { <l>left|<r>right } }"];
-p0x55b1344dd3c0[label = "{ <ptr> 0x55b1344dd3c0 |<type> VAR | <data>y| { <l>left|<r>right } }"];
+p0x556671f3a740[label = "{ <ptr> 0x556671f3a740 |<type> OP | <data>+| { <l>left|<r>right } }"];
+p0x556671f3a770[label = "{ <ptr> 0x556671f3a770 |<type> NUM | <data>0.000000| { <l>left|<r>right } }"];
+p0x556671f3a7a0[label = "{ <ptr> 0x556671f3a7a0 |<type> NUM | <data>1.000000| { <l>left|<r>right } }"];
 
-p0x55b1344dd420:<l> -> p0x55b1344dd360
-p0x55b1344dd360:<l> -> p0x55b1344dd300
-p0x55b1344dd300:<l> -> p0x55b1344dd2a0
-p0x55b1344dd300:<r> -> p0x55b1344dd2d0
-p0x55b1344dd360:<r> -> p0x55b1344dd330
-p0x55b1344dd420:<r> -> p0x55b1344dd3f0
-p0x55b1344dd3f0:<l> -> p0x55b1344dd390
-p0x55b1344dd3f0:<r> -> p0x55b1344dd3c0
+p0x556671f3a740:<l> -> p0x556671f3a770
+p0x556671f3a740:<r> -> p0x556671f3a7a0
 }
