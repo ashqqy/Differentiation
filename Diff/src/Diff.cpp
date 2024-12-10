@@ -1,83 +1,131 @@
 #include <stdlib.h>
+#include <assert.h>
 
+#include "Tree.h"
 #include "Diff.h"
 
 //--------------------------------------------------------------------------
 
-const char* s = "(520-20)/50$";
+const char* s = "(520-20)*x/50$";
 int p = 0;
 
-int GetG ()
+tree_node_t* GetG ()
 {
-    int val = GetE ();
+    tree_node_t* root_node = GetPlus ();
     if (s[p] != '$')
-        SyntaxError ();
+        SyntaxError (s[p]);
     p++;
-    return val;
+    return root_node;
 }
 
-int GetE ()
+tree_node_t* GetPlus ()
 {
-    int val = GetT ();
+    tree_node_t* first_node = GetMult ();
     while (s[p] == '+' || s[p] == '-')
-    {
-        int op = s[p];
+    {   
+        tree_data_t value;
+        value.type = OP;
+        if (s[p] == '+')
+            value.content.operation = ADD;
+        else
+            value.content.operation = SUB;
+
         p++;
-        int val2 = GetT ();
-        if (op == '+') val += val2;
-        else           val -= val2;
+        tree_node_t* second_node = GetMult ();
+
+        tree_node_t* parent_node = NodeCreate (value);
+        NodeLink (first_node, &parent_node->left);
+        NodeLink (second_node, &parent_node->right);
+
+        first_node = parent_node;
     }
-    return val;
+
+    return first_node;
 }
 
-int GetT ()
+tree_node_t* GetMult () // мб ошибка
 {
-    int val = GetP ();
+    tree_node_t* first_node = GetBracket ();
     while (s[p] == '*' || s[p] == '/')
     {
-        int op = s[p];
+        tree_data_t value;
+        value.type = OP;
+        if (s[p] == '*')
+            value.content.operation = MUL;
+        else
+            value.content.operation = DIV;
+
         p++;
-        int val2 = GetP ();
-        if (op == '*') val *= val2;
-        else           val /= val2;
+        tree_node_t* second_node = GetBracket ();
+
+        tree_node_t* parent_node = NodeCreate (value);
+        NodeLink (first_node, &parent_node->left);
+        NodeLink (second_node, &parent_node->right);
+        
+        first_node = parent_node;
     }
-    return val;
+    return first_node;
 }
 
-int GetP ()
+tree_node_t* GetBracket ()
 {
     if (s[p] == '(')
     {
         p++;
-        int val = GetE ();
+        tree_node_t* node = GetPlus ();
         if (s[p] != ')')
-            SyntaxError ();
+            SyntaxError (s[p]);
         p++;
-        return val;
+        return node;
     }
+    else if ('a' <= s[p] && s[p] <= 'z')
+        return GetVariable ();
     else
-        return GetN ();
+        return GetNumber ();
 }
 
-int GetN ()
+tree_node_t* GetNumber ()
 {
-    int val = 0;
+    tree_data_t value;
+    value.type           = NUM;
+    value.content.number = 0;
+
     int old_p = p;
     while ('0' <= s[p] && s[p] <= '9')
     {
-        val = val * 10 + s[p] - '0';
+        value.content.number = value.content.number * 10 + s[p] - '0';
         p++;
     }
 
     if (old_p == p)
-        SyntaxError ();
+        SyntaxError (s[p]);
 
-    return val;
+    return NodeCreate (value);;
 }
 
-void SyntaxError ()
+tree_node_t* GetVariable ()
 {
-    abort();
+    tree_data_t value;
+    value.type           = VAR;
+    value.content.number = 0;
+
+    int old_p = p;
+    if ('a' <= s[p] && s[p] <= 'z')
+    {
+        value.content.variable = s[p];
+        p++;
+    }
+
+    if (old_p == p)
+        SyntaxError (s[p]);
+
+    return NodeCreate (value);
+}
+
+void SyntaxError (char symb)
+{
+    printf ("Syntax error: %c\n", symb);
+    assert(0);
 }
 
 //--------------------------------------------------------------------------
