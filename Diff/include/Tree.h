@@ -41,11 +41,10 @@ struct tree_node_t
 
 //--------------------------------------------------------------------------
 
-char OperationDescribe (operations_t operation);
-
-tree_node_t* NodeCreate (tree_data_t data);
+tree_node_t* NodeCreate (tree_data_t data, tree_node_t* left_node = NULL, tree_node_t* right_node = NULL);
 tree_node_t* NodeLink (tree_node_t* node, tree_node_t** node_to_link_to);
 tree_node_t* NodeEditData (tree_node_t* node, tree_data_t new_data);
+tree_node_t* SubtreeCopy (tree_node_t* node);
 void TreeDestroy (tree_node_t* node);
 
 void TreeDump (tree_node_t* root_node);

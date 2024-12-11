@@ -9,15 +9,15 @@
 
 //------------------------------------------------------
 
-tree_node_t* NodeCreate (tree_data_t data)
+tree_node_t* NodeCreate (tree_data_t data, tree_node_t* left_node, tree_node_t* right_node)
 {
     tree_node_t* node = (tree_node_t*) calloc (1, sizeof (tree_node_t));
     if (node == NULL)
         return NULL;
 
     node->data   = data;
-    node->left   = NULL;
-    node->right  = NULL;
+    node->left   = left_node;
+    node->right  = right_node;
 
     return node;
 }
@@ -42,6 +42,29 @@ tree_node_t* NodeEditData (tree_node_t* node, tree_data_t new_data)
     node->data = new_data;
 
     return node;
+}
+
+//------------------------------------------------------
+
+tree_node_t* SubtreeCopy (tree_node_t* node)
+{
+    CustomAssert (node != NULL);
+
+    tree_node_t* node_copy = NodeCreate (node->data);
+
+    if (node->left != NULL)
+    {
+        tree_node_t* left_copy = SubtreeCopy (node->left);
+        NodeLink (left_copy, &node_copy->left);
+    }
+
+    if (node->right != NULL)
+    {
+        tree_node_t* right_copy = SubtreeCopy (node->right);
+        NodeLink (right_copy, &node_copy->right);
+    }
+
+    return node_copy;
 }
 
 //------------------------------------------------------

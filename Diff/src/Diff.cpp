@@ -5,50 +5,61 @@
 
 //--------------------------------------------------------------------------
 
-#define _NUM(num) do            \
-{                               \
-    value.type           = NUM; \
-    value.content.number = num; \
-    return NodeCreate (value);  \
-} while (0)
+#define _NUM(num) \
+    NodeCreate (tree_data_t {.content = {.number = num}, .type = NUM})
 
-#define _ADD(left_node, right_node) do             \
-{                                                  \
-    value.type              = OP;                  \
-    value.content.operation = ADD;                 \
-    tree_node_t* parent_node = NodeCreate (value); \
-    NodeLink (left_node, &parent_node->left);      \
-    NodeLink (right_node, &parent_node->right);    \
-    return parent_node;                            \
-} while (0)
+#define _ADD(left_node, right_node) \
+    NodeCreate (tree_data_t {.content = {.operation = ADD}, .type = OP}, left_node, right_node)
 
+#define _SUB(left_node, right_node) \
+    NodeCreate (tree_data_t {.content = {.operation = SUB}, .type = OP}, left_node, right_node)
+
+#define _MUL(left_node, right_node) \
+    NodeCreate (tree_data_t {.content = {.operation = MUL}, .type = OP}, left_node, right_node)
+
+#define _DIV(left_node, right_node) \
+    NodeCreate (tree_data_t {.content = {.operation = DIV}, .type = OP}, left_node, right_node)
 
 //--------------------------------------------------------------------------
 
 tree_node_t* Diff (tree_node_t* node)
 {
     CustomAssert (node != NULL);
-    tree_data_t value;
 
-    if (node->data.type == NUM)
-        _NUM (0);
-
-    else if (node->data.type == VAR)
-        _NUM (1);
-
-    else if (node->data.type == OP)
+    switch (node->data.type)
     {
-        switch (node->data.content.operation)
+        case NUM:
+            return _NUM (0);
+
+        case VAR:
+            return _NUM (1);
+
+        case OP:
         {
-            case ADD: 
-                _ADD (Diff (node->left), Diff (node->right));
-            
-            case SUB:
-            case MUL:
-            case DIV:
-            default:
-                break;
+            switch (node->data.content.operation)
+            {
+                case ADD: 
+                    return _ADD (Diff (node->left), Diff (node->right));
+
+                case SUB:
+                    return _SUB (Diff (node->left), Diff (node->right));
+
+                case MUL:
+                    return _ADD (_MUL(Diff (node->left), SubtreeCopy (node->right)), 
+                                 _MUL(Diff (node->right), SubtreeCopy (node->left)));
+ 
+                case DIV:
+                    return _DIV (_SUB (_MUL (Diff (node->left), SubtreeCopy (node->right)), 
+                                 _MUL (Diff (node->right), SubtreeCopy (node->left))), 
+                                 _MUL (SubtreeCopy (node->right), SubtreeCopy (node->right)));
+
+                default:
+                    break;
+            }
         }
+
+        default:
+            break;
     }
 
     return NULL;
