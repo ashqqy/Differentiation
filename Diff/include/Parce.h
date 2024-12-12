@@ -11,7 +11,6 @@ tree_node_t* GetMult ();
 tree_node_t* GetBracket ();
 tree_node_t* GetNumber ();
 tree_node_t* GetVariable ();
-void SyntaxError (char symb);
 
 //--------------------------------------------------------------------------
 

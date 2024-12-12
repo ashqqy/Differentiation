@@ -3,6 +3,7 @@
 
 #include "Tree.h"
 #include "Parce.h"
+#include "Tokenization.h"
 
 //--------------------------------------------------------------------------
 
@@ -120,12 +121,6 @@ tree_node_t* GetVariable ()
         SyntaxError (s[p]);
 
     return NodeCreate (value);
-}
-
-void SyntaxError (char symb)
-{
-    printf ("Syntax error: %c\n", symb);
-    assert(0);
 }
 
 //--------------------------------------------------------------------------

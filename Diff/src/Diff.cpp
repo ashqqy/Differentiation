@@ -5,6 +5,11 @@
 
 //--------------------------------------------------------------------------
 
+#define _DIFF_L Diff (node->left)
+#define _DIFF_R Diff (node->right)
+#define _COPY_L SubtreeCopy (node->left)
+#define _COPY_R SubtreeCopy (node->right)
+
 #define _NUM(num) \
     NodeCreate (tree_data_t {.content = {.number = num}, .type = NUM})
 
@@ -28,7 +33,8 @@ tree_node_t* Diff (tree_node_t* node)
 
     switch (node->data.type)
     {
-        case NUM:
+        case NUM: 
+        case CONST:
             return _NUM (0);
 
         case VAR:
@@ -39,19 +45,18 @@ tree_node_t* Diff (tree_node_t* node)
             switch (node->data.content.operation)
             {
                 case ADD: 
-                    return _ADD (Diff (node->left), Diff (node->right));
+                    return _ADD (_DIFF_L, _DIFF_R);
 
                 case SUB:
-                    return _SUB (Diff (node->left), Diff (node->right));
+                    return _SUB (_DIFF_L, _DIFF_R);
 
                 case MUL:
-                    return _ADD (_MUL(Diff (node->left), SubtreeCopy (node->right)), 
-                                 _MUL(Diff (node->right), SubtreeCopy (node->left)));
+                    return _ADD (_MUL(_DIFF_L, _COPY_R), 
+                                 _MUL(_DIFF_R, _COPY_L));
  
                 case DIV:
-                    return _DIV (_SUB (_MUL (Diff (node->left), SubtreeCopy (node->right)), 
-                                 _MUL (Diff (node->right), SubtreeCopy (node->left))), 
-                                 _MUL (SubtreeCopy (node->right), SubtreeCopy (node->right)));
+                    return _DIV (_SUB (_MUL (_DIFF_L, _COPY_R), 
+                           _MUL (_DIFF_R, _COPY_L)), _MUL (_COPY_R, _COPY_R));
 
                 default:
                     break;

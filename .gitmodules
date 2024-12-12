@@ -4,3 +4,6 @@
 [submodule "Custom-Assert"]
 	path = Custom-Assert
 	url = https://github.com/ashqqy/Custom-Assert/
+[submodule "My-Allocation"]
+	path = My-Allocation
+	url = https://github.com/ashqqy/My-Allocation

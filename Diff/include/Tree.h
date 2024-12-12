@@ -7,17 +7,43 @@
 
 enum tree_data_type_t
 {
-    NUM = 1,
-    VAR = 2,
-    OP  = 3
+    NUM     = 1,
+    CONST   = 2,
+    VAR     = 3,
+    OP      = 4,
+    FUNC    = 5,
+    BRACKET = 6
 };
 
-enum operations_t
+enum bracket_t
+{
+    BRACKET_OP = 40,
+    BRACKET_CL = 41,
+};
+
+enum math_constant_t
+{
+    EXP = 101,
+    PI  = 960
+};
+
+enum math_function_t
+{
+    SIN = 1,
+    COS = 2,
+    TG  = 3,
+    CTG = 4,
+    LOG = 5,
+    LN  = 6
+};
+
+enum operation_t
 {
     ADD = 43,
     SUB = 45,
     MUL = 42,
-    DIV = 47
+    DIV = 47,
+    DEG = 94,
 };
 
 struct tree_data_t
@@ -26,7 +52,10 @@ struct tree_data_t
     {
         char variable;
         double number;
-        operations_t operation;
+        math_constant_t constant;
+        math_function_t function;
+        operation_t operation;
+        bracket_t bracket;
     } content;
 
     tree_data_type_t type;
