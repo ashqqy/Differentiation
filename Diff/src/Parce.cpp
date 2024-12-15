@@ -1,126 +1,178 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "CustomAssert.h"
 #include "Tree.h"
 #include "Parce.h"
 #include "Tokenization.h"
 
 //--------------------------------------------------------------------------
 
-const char* s = "1/x$";
-int p = 0;
+#define token_data_(struct_field) token_array[*shift]->data.struct_field
 
-tree_node_t* GetG ()
+//--------------------------------------------------------------------------
+
+tree_node_t* GetG (tree_node_t** token_array, int* shift)
 {
-    tree_node_t* root_node = GetPlus ();
-    if (s[p] != '$')
-        SyntaxError (s[p]);
-    p++;
+    CustomAssert (token_array != NULL);
+    CustomAssert (shift       != NULL);
+
+    tree_node_t* root_node = GetPlus (token_array, shift);
+
+    if ((token_data_ (type) != SP_SYMB) || (token_data_ (content.special_symb) != EXPRESSION_END))
+        SyntaxError ("GetG");
+
+    // free (token_array[*shift]); token_array[*shift] = NULL;
+    *shift += 1;
     return root_node;
 }
 
-tree_node_t* GetPlus ()
+tree_node_t* GetPlus (tree_node_t** token_array, int* shift)
 {
-    tree_node_t* first_node = GetMult ();
-    while (s[p] == '+' || s[p] == '-')
+    CustomAssert (token_array != NULL);
+    CustomAssert (shift       != NULL);
+
+    tree_node_t* first_node = GetMult (token_array, shift);
+    while ((token_data_ (type) == OP) && (token_data_ (content.operation) == ADD || token_data_ (content.operation) == SUB))
     {   
-        tree_data_t value;
-        value.type = OP;
-        if (s[p] == '+')
-            value.content.operation = ADD;
-        else
-            value.content.operation = SUB;
+        tree_node_t* parent_node = token_array[*shift];
 
-        p++;
-        tree_node_t* second_node = GetMult ();
-
-        tree_node_t* parent_node = NodeCreate (value);
+        *shift += 1;
+        tree_node_t* second_node = GetMult (token_array, shift);
+        
         NodeLink (first_node, &parent_node->left);
         NodeLink (second_node, &parent_node->right);
 
-        first_node = parent_node;
+        return parent_node;
     }
-
     return first_node;
 }
 
-tree_node_t* GetMult ()
+tree_node_t* GetMult (tree_node_t** token_array, int* shift)
 {
-    tree_node_t* first_node = GetBracket ();
-    while (s[p] == '*' || s[p] == '/')
+    CustomAssert (token_array != NULL);
+    CustomAssert (shift       != NULL);
+
+    tree_node_t* first_node = GetDegree (token_array, shift);
+
+    while ((token_data_ (type) == OP) && (token_data_ (content.operation) == MUL || 
+            token_data_ (content.operation) == DIV))
     {
-        tree_data_t value;
-        value.type = OP;
-        if (s[p] == '*')
-            value.content.operation = MUL;
-        else
-            value.content.operation = DIV;
+        tree_node_t* parent_node = token_array[*shift];
 
-        p++;
-        tree_node_t* second_node = GetBracket ();
+        *shift += 1;
+        tree_node_t* second_node = GetDegree (token_array, shift);
 
-        tree_node_t* parent_node = NodeCreate (value);
-        NodeLink (first_node, &parent_node->left);
+        NodeLink (first_node,  &parent_node->left);
         NodeLink (second_node, &parent_node->right);
         
-        first_node = parent_node;
+        return parent_node;
     }
     return first_node;
 }
 
-tree_node_t* GetBracket ()
+tree_node_t* GetDegree (tree_node_t** token_array, int* shift)
 {
-    if (s[p] == '(')
+    CustomAssert (token_array != NULL);
+    CustomAssert (shift       != NULL);
+
+    tree_node_t* first_node = GetFunc (token_array, shift);
+
+    if ((token_data_ (type) == OP) && (token_data_ (content.operation) == DEG))
     {
-        p++;
-        tree_node_t* node = GetPlus ();
-        if (s[p] != ')')
-            SyntaxError (s[p]);
-        p++;
+        tree_node_t* parent_node = token_array[*shift];
+
+        *shift += 1;
+        tree_node_t* second_node = GetFunc (token_array, shift);
+
+        NodeLink (first_node,  &parent_node->left);
+        NodeLink (second_node, &parent_node->right);
+
+        return parent_node;
+    }
+
+    return first_node;
+}
+
+tree_node_t* GetFunc (tree_node_t** token_array, int* shift)
+{
+    CustomAssert (token_array != NULL);
+    CustomAssert (shift       != NULL);
+
+    if (token_data_ (type) == FUNC)
+    {
+        tree_node_t* parent_node = token_array[*shift];
+        *shift += 1;
+
+        if ((token_data_ (type) == SP_SYMB) && 
+            (token_data_ (content.special_symb) == BRACKET_OP))
+        {
+            tree_node_t* func_arg = GetBracket (token_array, shift);
+            NodeLink (func_arg, &parent_node->left);
+        }
+        else
+            SyntaxError ("func without open bracket");
+        
+        return parent_node;
+    }
+
+    return GetBracket (token_array, shift);
+}
+
+tree_node_t* GetBracket (tree_node_t** token_array, int* shift)
+{
+    CustomAssert (token_array != NULL);
+    CustomAssert (shift       != NULL);
+
+    if ((token_data_ (type) == SP_SYMB) && 
+       (token_data_ (content.special_symb) == BRACKET_OP))
+    {
+        *shift += 1; // почему нельзя ++
+        tree_node_t* node = GetPlus (token_array, shift);
+        if ((token_data_ (type) != SP_SYMB) || 
+            (token_data_ (content.special_symb) != BRACKET_CL))
+            SyntaxError ("GetBracket"); // TODO
+
+        *shift += 1;
         return node;
     }
-    else if ('a' <= s[p] && s[p] <= 'z')
-        return GetVariable ();
+
+    else if (token_data_ (type) == VAR)
+        return GetVariable (token_array, shift);
     else
-        return GetNumber ();
+        return GetNumber (token_array, shift);
 }
 
-tree_node_t* GetNumber ()
+tree_node_t* GetNumber (tree_node_t** token_array, int* shift)
 {
-    tree_data_t value;
-    value.type           = NUM;
-    value.content.number = 0;
+    CustomAssert (token_array != NULL);
+    CustomAssert (shift       != NULL);
 
-    int old_p = p;
-    while ('0' <= s[p] && s[p] <= '9')
-    {
-        value.content.number = value.content.number * 10 + s[p] - '0';
-        p++;
-    }
+    tree_node_t* node = NULL; // FIXME ??????
+    if (token_data_ (type) == NUM)
+        node = token_array[*shift];
+    else
+        SyntaxError ("GetNumber");
 
-    if (old_p == p)
-        SyntaxError (s[p]);
+    *shift += 1;
 
-    return NodeCreate (value);;
+    return node;
 }
 
-tree_node_t* GetVariable ()
+tree_node_t* GetVariable (tree_node_t** token_array, int* shift)
 {
-    tree_data_t value;
-    value.type           = VAR;
-    value.content.number = 0;
+    CustomAssert (token_array != NULL);
+    CustomAssert (shift       != NULL);
 
-    int old_p = p;
-    if ('a' <= s[p] && s[p] <= 'z')
-    {
-        value.content.variable = s[p];
-        p++;
-    }
+    tree_node_t* node = NULL; // FIXME ??????
+    if (token_data_ (type) == VAR)
+        node = token_array[*shift];
+    else 
+        SyntaxError ("GetVariable");
 
-    if (old_p == p)
-        SyntaxError (s[p]);
+    *shift += 1;
 
-    return NodeCreate (value);
+    return node;
 }
 
 //--------------------------------------------------------------------------

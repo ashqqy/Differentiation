@@ -1,7 +1,9 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
+#include "Tree.h"
 #include "Tokenization.h"
 #include "CustomAssert.h"
 #include "MyAllocation.h"
@@ -12,10 +14,9 @@
     token_array[token_array_shift]->data.content.union_type = union_data;             \
     token_array_shift += 1
 
-
 //--------------------------------------------------------------------------
 
-reserved_name_t reserved_names[] = 
+const reserved_name_t reserved_names[] = 
 {
     {.name = "e",   .data = {.content = {.constant = EXP}, .type = CONST}},
     {.name = "pi",  .data = {.content = {.constant = PI},  .type = CONST}},
@@ -26,9 +27,10 @@ reserved_name_t reserved_names[] =
     {.name = "ln",  .data = {.content = {.function = LN},  .type = FUNC}},
 };
 
-int FindReservedName (char* name, tree_data_t* data)
+int FindReservedName (const char* name, tree_data_t* data)
 {
-    CustomAssert (reserved_names != NULL);
+    CustomAssert (name != NULL);
+    CustomAssert (data != NULL);
 
     for (size_t i = 0; i < sizeof (reserved_names) / sizeof (reserved_names[0]); ++i)
     {
@@ -46,6 +48,8 @@ int FindReservedName (char* name, tree_data_t* data)
 
 tree_node_t** Tokenization (char* buffer, size_t buffer_size, int* shift)
 {
+    CustomAssert (buffer != NULL);
+    CustomAssert (shift  != NULL);
     // TODO resize
     tree_node_t** token_array = (tree_node_t**) calloc (TOKEN_ARRAY_SIZE, sizeof (tree_node_t*));
     int token_array_shift = 0;
@@ -53,9 +57,9 @@ tree_node_t** Tokenization (char* buffer, size_t buffer_size, int* shift)
     while (buffer[*shift] != '\n' && (size_t) *shift < buffer_size)
     {
         // ебейшая проверка на то, что либо '-' у числа в самом начале строки либо после открывающей скобки
-        if (('0' <= buffer[*shift] && buffer[*shift] <= '9') || (buffer[*shift] == '-' && 
-        (token_array_shift == 0 || (token_array[token_array_shift - 1]->data.type == BRACKET && 
-        token_array[token_array_shift - 1]->data.content.bracket == BRACKET_OP))))
+        if (isdigit(buffer[*shift]) || (buffer[*shift] == '-' && 
+        (token_array_shift == 0 || (token_array[token_array_shift - 1]->data.type == SP_SYMB && 
+        token_array[token_array_shift - 1]->data.content.special_symb == BRACKET_OP)))) // TODO
         {
             int n = 0;
             double readen_number = 0;
@@ -66,7 +70,7 @@ tree_node_t** Tokenization (char* buffer, size_t buffer_size, int* shift)
             *shift += n;
         }
 
-        else if (('a' <= buffer[*shift] && buffer[*shift] <= 'z') || ('A' <= buffer[*shift] && buffer[*shift] <= 'Z'))
+        else if (isalpha(buffer[*shift]))
         {
             tree_data_t token_data = {};
             char name[10] = "";
@@ -83,7 +87,7 @@ tree_node_t** Tokenization (char* buffer, size_t buffer_size, int* shift)
 
                 else 
                 {
-                    SyntaxError (buffer[*shift]);
+                    SyntaxError ("big variable name");
                 }
             }
 
@@ -104,7 +108,7 @@ tree_node_t** Tokenization (char* buffer, size_t buffer_size, int* shift)
 
         else if (buffer[*shift] == '(' || buffer[*shift] == ')')
         {
-            _TOKEN_INIT (BRACKET, operation, (operation_t) buffer[*shift]);
+            _TOKEN_INIT (SP_SYMB, special_symb, (special_symb_t) buffer[*shift]);
             *shift += 1;
         }
 
@@ -122,12 +126,12 @@ tree_node_t** Tokenization (char* buffer, size_t buffer_size, int* shift)
 
         else 
         {
-            SyntaxError (buffer[*shift]);
+            SyntaxError ("strange symbol");
         }
     }
 
     // токен конца выражения
-    _TOKEN_INIT (CONST, variable, '$');
+    _TOKEN_INIT (SP_SYMB, special_symb, EXPRESSION_END);
 
     token_array = (tree_node_t**) MyRecalloc (token_array, (size_t) token_array_shift + 1, sizeof (tree_node_t*), TOKEN_ARRAY_SIZE, 0);
     return token_array;
@@ -135,9 +139,23 @@ tree_node_t** Tokenization (char* buffer, size_t buffer_size, int* shift)
 
 //--------------------------------------------------------------------------
 
-[[noreturn]] void SyntaxError (char symb)
+void TokenArrayDestroy (tree_node_t** token_array)
 {
-    printf ("Syntax error: %c\n", symb);
+    int i = 0;
+    while ((token_array[i]->data.type != SP_SYMB) || (token_array[i]->data.content.special_symb != EXPRESSION_END))
+    {
+        free (token_array[i]); token_array[i] = NULL;
+        i++;
+    }
+    free (token_array[i]); token_array[i] = NULL;
+    free (token_array); token_array = NULL;
+}
+
+//--------------------------------------------------------------------------
+
+void SyntaxError (const char* message)
+{
+    printf ("Syntax error: %s\n", message);
     assert(0);
 }
 

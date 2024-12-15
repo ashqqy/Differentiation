@@ -12,13 +12,14 @@ enum tree_data_type_t
     VAR     = 3,
     OP      = 4,
     FUNC    = 5,
-    BRACKET = 6
+    SP_SYMB = 6
 };
 
-enum bracket_t
+enum special_symb_t
 {
-    BRACKET_OP = 40,
-    BRACKET_CL = 41,
+    EXPRESSION_END = 39,
+    BRACKET_OP     = 40,
+    BRACKET_CL     = 41
 };
 
 enum math_constant_t
@@ -33,8 +34,7 @@ enum math_function_t
     COS = 2,
     TG  = 3,
     CTG = 4,
-    LOG = 5,
-    LN  = 6
+    LN  = 5
 };
 
 enum operation_t
@@ -55,7 +55,7 @@ struct tree_data_t
         math_constant_t constant;
         math_function_t function;
         operation_t operation;
-        bracket_t bracket;
+        special_symb_t special_symb;
     } content;
 
     tree_data_type_t type;
@@ -79,6 +79,10 @@ void TreeDestroy (tree_node_t* node);
 void TreeDump (tree_node_t* root_node);
 void TreeNodeDescrDump (FILE* dump_file, tree_node_t* node);
 void TreeNodeLinkDump (FILE* dump_file, tree_node_t* node);
+
+const char* DescribeMathFunc (math_function_t func_enum);
+const char* DescribeMathConst (math_constant_t const_enum);
+
 
 //--------------------------------------------------------------------------
 

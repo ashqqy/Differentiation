@@ -117,15 +117,47 @@ void TreeNodeDescrDump (FILE* dump_file, tree_node_t* node)
     if (node == NULL)
         return;
 
-    if      (node->data.type == NUM)
-        fprintf (dump_file, "p%p[label = \"{ <ptr> %p |<type> %s | <data>%lf| { <l>left|<r>right } }\"];\n", 
-                            node, node, "NUM", node->data.content.number);
-    else if (node->data.type == OP)
-        fprintf (dump_file, "p%p[label = \"{ <ptr> %p |<type> %s | <data>%c| { <l>left|<r>right } }\"];\n", 
-                            node, node, "OP", node->data.content.operation);
-    else if (node->data.type == VAR)
-        fprintf (dump_file, "p%p[label = \"{ <ptr> %p |<type> %s | <data>%c| { <l>left|<r>right } }\"];\n", 
-                            node, node, "VAR", node->data.content.variable);
+    switch (node->data.type)
+    {
+        case NUM:
+        {
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p |<type> %s | <data>%lf| { <l>left|<r>right } }\"];\n", 
+                                node, node, "NUM", node->data.content.number);
+            break;
+        }
+        case OP:
+        {
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p |<type> %s | <data>%c| { <l>left|<r>right } }\"];\n", 
+                                node, node, "OP", node->data.content.operation);
+            break;
+        }
+        case VAR:
+        {
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p |<type> %s | <data>%c| { <l>left|<r>right } }\"];\n", 
+                                node, node, "VAR", node->data.content.variable);
+            break;
+        }
+        case FUNC:
+        {
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p |<type> %s | <data>%s| { <l>left|<r>right } }\"];\n", 
+                                node, node, "FUNC", DescribeMathFunc (node->data.content.function));
+            break;
+        }
+        case CONST:
+        {
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p |<type> %s | <data>%s| { <l>left|<r>right } }\"];\n", 
+                                node, node, "CONST", DescribeMathConst (node->data.content.constant));
+            break;
+        }
+        case SP_SYMB:
+        {
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p |<type> %s | <data>%c| { <l>left|<r>right } }\"];\n", 
+                                node, node, "SP_SYMB",node->data.content.special_symb);
+            break;
+        }
+        default: 
+            break;
+    }
     
     if (node->left  != NULL) TreeNodeDescrDump (dump_file, node->left);
     if (node->right != NULL) TreeNodeDescrDump (dump_file, node->right);
@@ -145,6 +177,37 @@ void TreeNodeLinkDump (FILE* dump_file, tree_node_t* node)
         fprintf (dump_file, "p%p:<r> -> p%p\n", node, node->right);
         TreeNodeLinkDump (dump_file, node->right);
     }
+}
+
+//------------------------------------------------------
+
+const char* DescribeMathFunc (math_function_t func_enum)
+{
+    #define DESCR_(name) case name: return #name
+    switch (func_enum)
+    {
+        DESCR_(SIN);
+        DESCR_(COS);
+        DESCR_(TG);
+        DESCR_(CTG);
+        DESCR_(LN);
+        default:
+            return "not found";
+    }
+    #undef DESCR_
+}
+
+const char* DescribeMathConst (math_constant_t const_enum)
+{
+    #define DESCR_(name) case name: return #name;
+    switch (const_enum)
+    {
+        DESCR_(EXP);
+        DESCR_(PI);
+        default:
+            return "not found";
+    }
+    #undef DESCR_
 }
 
 //------------------------------------------------------

@@ -5,25 +5,41 @@
 
 //--------------------------------------------------------------------------
 
-#define _DIFF_L Diff (node->left)
-#define _DIFF_R Diff (node->right)
-#define _COPY_L SubtreeCopy (node->left)
-#define _COPY_R SubtreeCopy (node->right)
+#define DIFF_(node) Diff (node)
+#define DIFF_L_ Diff (node->left)
+#define DIFF_R_ Diff (node->right)
+#define COPY_L_ SubtreeCopy (node->left)
+#define COPY_R_ SubtreeCopy (node->right)
 
-#define _NUM(num) \
+#define NUM_(num) \
     NodeCreate (tree_data_t {.content = {.number = num}, .type = NUM})
 
-#define _ADD(left_node, right_node) \
+#define CONST_(name) \
+    NodeCreate (tree_data_t {.content = {.constant = name}, .type = CONST})
+
+#define ADD_(left_node, right_node) \
     NodeCreate (tree_data_t {.content = {.operation = ADD}, .type = OP}, left_node, right_node)
 
-#define _SUB(left_node, right_node) \
+#define SUB_(left_node, right_node) \
     NodeCreate (tree_data_t {.content = {.operation = SUB}, .type = OP}, left_node, right_node)
 
-#define _MUL(left_node, right_node) \
+#define MUL_(left_node, right_node) \
     NodeCreate (tree_data_t {.content = {.operation = MUL}, .type = OP}, left_node, right_node)
 
-#define _DIV(left_node, right_node) \
+#define DIV_(left_node, right_node) \
     NodeCreate (tree_data_t {.content = {.operation = DIV}, .type = OP}, left_node, right_node)
+
+#define DEG_(left_node, right_node) \
+    NodeCreate (tree_data_t {.content = {.operation = DEG}, .type = OP}, left_node, right_node)
+
+#define LN_(node) \
+    NodeCreate (tree_data_t {.content = {.function = LN}, .type = FUNC}, node)
+
+#define SIN_(node) \
+    NodeCreate (tree_data_t {.content = {.function = SIN}, .type = FUNC}, node)
+
+#define COS_(node) \
+    NodeCreate (tree_data_t {.content = {.function = COS}, .type = FUNC}, node)
 
 //--------------------------------------------------------------------------
 
@@ -35,34 +51,71 @@ tree_node_t* Diff (tree_node_t* node)
     {
         case NUM: 
         case CONST:
-            return _NUM (0);
+            return NUM_ (0);
 
         case VAR:
-            return _NUM (1);
+            return NUM_ (1);
 
         case OP:
         {
             switch (node->data.content.operation)
             {
                 case ADD: 
-                    return _ADD (_DIFF_L, _DIFF_R);
+                    return ADD_ (DIFF_L_, DIFF_R_);
 
                 case SUB:
-                    return _SUB (_DIFF_L, _DIFF_R);
+                    return SUB_ (DIFF_L_, DIFF_R_);
 
                 case MUL:
-                    return _ADD (_MUL(_DIFF_L, _COPY_R), 
-                                 _MUL(_DIFF_R, _COPY_L));
+                    return ADD_ (MUL_(DIFF_L_, COPY_R_), 
+                                 MUL_(DIFF_R_, COPY_L_));
  
                 case DIV:
-                    return _DIV (_SUB (_MUL (_DIFF_L, _COPY_R), 
-                           _MUL (_DIFF_R, _COPY_L)), _MUL (_COPY_R, _COPY_R));
+                    return DIV_ (SUB_ (MUL_ (DIFF_L_, COPY_R_), 
+                           MUL_ (DIFF_R_, COPY_L_)), MUL_ (COPY_R_, COPY_R_));
+
+                case DEG:
+                {
+                    if (node->left->data.type == NUM || node->left->data.type == CONST)
+                        return MUL_ (MUL_ (DEG_ (COPY_L_,  COPY_R_), LN_ (COPY_L_)), DIFF_R_);
+
+                    else if (node->right->data.type == NUM)
+                        return MUL_ (MUL_ (COPY_R_, DEG_ (COPY_L_, NUM_ (node->right->data.content.number - 1))), DIFF_L_);
+                    
+                    else if (node->right->data.type == CONST)
+                        return MUL_ (MUL_ (COPY_R_, DEG_ (COPY_L_, SUB_ (COPY_R_, NUM_ (1)))), DIFF_L_);
+
+                    else 
+                        return DIFF_ (DEG_ (CONST_ (EXP) , MUL_ (LN_ (COPY_L_), COPY_R_)));
+                }
 
                 default:
                     break;
             }
         }
 
+        case FUNC:
+        {
+            switch (node->data.content.function)
+            {
+                case SIN:
+                    return MUL_ (COS_ (COPY_L_), DIFF_L_);
+                case COS:
+                    return MUL_ (MUL_ (NUM_ (-1), SIN_ (COPY_L_)), DIFF_L_);
+                case TG:
+                    return MUL_ (DIV_ (NUM_ (1), DEG_ (COS_ (COPY_L_), NUM_ (2))), DIFF_L_);
+                case CTG:
+                    return MUL_ (MUL_ (NUM_ (-1), DIV_ (NUM_ (1), DEG_ (SIN_ (COPY_L_), NUM_ (2)))), DIFF_L_);
+                case LN:
+                    return MUL_ (DIV_ (NUM_ (1), COPY_L_), DIFF_L_);
+
+                default:
+                    break;
+            }
+
+        }
+
+        case SP_SYMB:
         default:
             break;
     }

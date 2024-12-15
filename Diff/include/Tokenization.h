@@ -11,8 +11,9 @@ struct reserved_name_t
     tree_data_t data;
 };
 
-int FindReservedName (char* name, tree_data_t* data);
+int FindReservedName (const char* name, tree_data_t* data);
 tree_node_t** Tokenization (char* buffer, size_t buffer_size, int* ptr);
-[[noreturn]] void SyntaxError (char symb);
+void TokenArrayDestroy (tree_node_t** token_array);
+[[noreturn]] void SyntaxError (const char* message); // FIXME WTF
 
 #endif // TOKENIZATION_H
