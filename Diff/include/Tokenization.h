@@ -11,9 +11,21 @@ struct reserved_name_t
     tree_data_t data;
 };
 
-int FindReservedName (const char* name, tree_data_t* data);
+const reserved_name_t reserved_names[] = 
+{
+    {.name = "e",   .data = {.content = {.constant = EXP}, .type = CONST}},
+    {.name = "pi",  .data = {.content = {.constant = PI},  .type = CONST}},
+    {.name = "sin", .data = {.content = {.function = SIN}, .type = FUNC}},
+    {.name = "cos", .data = {.content = {.function = COS}, .type = FUNC}},
+    {.name = "tg",  .data = {.content = {.function = TG},  .type = FUNC}},
+    {.name = "ctg", .data = {.content = {.function = CTG}, .type = FUNC}},
+    {.name = "ln",  .data = {.content = {.function = LN},  .type = FUNC}},
+};
+
+int FindReservedData (const char* name, tree_data_t* data);
+const char* FindReservedName (tree_data_t* data);
 tree_node_t** Tokenization (char* buffer, size_t buffer_size, int* ptr);
 void TokenArrayDestroy (tree_node_t** token_array);
-[[noreturn]] void SyntaxError (const char* message); // FIXME WTF
+[[noreturn]] void SyntaxError (const char* message);
 
 #endif // TOKENIZATION_H

@@ -22,7 +22,7 @@ tree_node_t* GetG (tree_node_t** token_array, int* shift)
     if ((token_data_ (type) != SP_SYMB) || (token_data_ (content.special_symb) != EXPRESSION_END))
         SyntaxError ("GetG");
 
-    // free (token_array[*shift]); token_array[*shift] = NULL;
+    free (token_array[*shift]); token_array[*shift] = NULL;
     *shift += 1;
     return root_node;
 }
@@ -43,7 +43,7 @@ tree_node_t* GetPlus (tree_node_t** token_array, int* shift)
         NodeLink (first_node, &parent_node->left);
         NodeLink (second_node, &parent_node->right);
 
-        return parent_node;
+        first_node = parent_node;
     }
     return first_node;
 }
@@ -66,7 +66,7 @@ tree_node_t* GetMult (tree_node_t** token_array, int* shift)
         NodeLink (first_node,  &parent_node->left);
         NodeLink (second_node, &parent_node->right);
         
-        return parent_node;
+        first_node = parent_node;
     }
     return first_node;
 }
@@ -78,7 +78,7 @@ tree_node_t* GetDegree (tree_node_t** token_array, int* shift)
 
     tree_node_t* first_node = GetFunc (token_array, shift);
 
-    if ((token_data_ (type) == OP) && (token_data_ (content.operation) == DEG))
+    while ((token_data_ (type) == OP) && (token_data_ (content.operation) == DEG))
     {
         tree_node_t* parent_node = token_array[*shift];
 
@@ -88,7 +88,7 @@ tree_node_t* GetDegree (tree_node_t** token_array, int* shift)
         NodeLink (first_node,  &parent_node->left);
         NodeLink (second_node, &parent_node->right);
 
-        return parent_node;
+        first_node = parent_node;
     }
 
     return first_node;
@@ -119,7 +119,7 @@ tree_node_t* GetFunc (tree_node_t** token_array, int* shift)
     return GetBracket (token_array, shift);
 }
 
-tree_node_t* GetBracket (tree_node_t** token_array, int* shift)
+tree_node_t* GetBracket (tree_node_t** token_array, int* const shift)
 {
     CustomAssert (token_array != NULL);
     CustomAssert (shift       != NULL);
@@ -127,11 +127,15 @@ tree_node_t* GetBracket (tree_node_t** token_array, int* shift)
     if ((token_data_ (type) == SP_SYMB) && 
        (token_data_ (content.special_symb) == BRACKET_OP))
     {
-        *shift += 1; // почему нельзя ++
+        free (token_array[*shift]); token_array[*shift] = NULL;
+
+        (*shift)++; // почему нельзя ++
         tree_node_t* node = GetPlus (token_array, shift);
         if ((token_data_ (type) != SP_SYMB) || 
             (token_data_ (content.special_symb) != BRACKET_CL))
             SyntaxError ("GetBracket"); // TODO
+
+        free (token_array[*shift]); token_array[*shift] = NULL;
 
         *shift += 1;
         return node;
@@ -139,20 +143,23 @@ tree_node_t* GetBracket (tree_node_t** token_array, int* shift)
 
     else if (token_data_ (type) == VAR)
         return GetVariable (token_array, shift);
+    else if (token_data_ (type) == CONST)
+        return GetConst (token_array, shift);
     else
         return GetNumber (token_array, shift);
 }
 
-tree_node_t* GetNumber (tree_node_t** token_array, int* shift)
+tree_node_t* GetConst (tree_node_t** token_array, int* shift)
+
 {
     CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CustomAssert (shift       != NULL);  
 
     tree_node_t* node = NULL; // FIXME ??????
-    if (token_data_ (type) == NUM)
+    if (token_data_ (type) == CONST)
         node = token_array[*shift];
-    else
-        SyntaxError ("GetNumber");
+    else 
+        SyntaxError ("GetConst");
 
     *shift += 1;
 
@@ -169,6 +176,22 @@ tree_node_t* GetVariable (tree_node_t** token_array, int* shift)
         node = token_array[*shift];
     else 
         SyntaxError ("GetVariable");
+
+    *shift += 1;
+
+    return node;
+}
+
+tree_node_t* GetNumber (tree_node_t** token_array, int* shift)
+{
+    CustomAssert (token_array != NULL);
+    CustomAssert (shift       != NULL);
+
+    tree_node_t* node = NULL; // FIXME ??????
+    if (token_data_ (type) == NUM)
+        node = token_array[*shift];
+    else
+        SyntaxError ("GetNumber");
 
     *shift += 1;
 

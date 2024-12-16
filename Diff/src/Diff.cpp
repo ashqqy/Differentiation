@@ -1,4 +1,3 @@
-
 #include "CustomAssert.h"
 #include "Tree.h"
 #include "Diff.h"
@@ -16,6 +15,8 @@
 
 #define CONST_(name) \
     NodeCreate (tree_data_t {.content = {.constant = name}, .type = CONST})
+
+// TODO #define OPER_(op_, left_node, right)
 
 #define ADD_(left_node, right_node) \
     NodeCreate (tree_data_t {.content = {.operation = ADD}, .type = OP}, left_node, right_node)
@@ -86,12 +87,18 @@ tree_node_t* Diff (tree_node_t* node)
                         return MUL_ (MUL_ (COPY_R_, DEG_ (COPY_L_, SUB_ (COPY_R_, NUM_ (1)))), DIFF_L_);
 
                     else 
-                        return DIFF_ (DEG_ (CONST_ (EXP) , MUL_ (LN_ (COPY_L_), COPY_R_)));
+                    {
+                        tree_node_t* ln_node = LN_ (node->left);
+                        node->left = CONST_ (EXP);
+                        node->right = MUL_ (ln_node, node->right);
+                        return DIFF_ (node);
+                    }
                 }
 
                 default:
                     break;
             }
+            break;
         }
 
         case FUNC:
@@ -112,7 +119,7 @@ tree_node_t* Diff (tree_node_t* node)
                 default:
                     break;
             }
-
+            break;
         }
 
         case SP_SYMB:
