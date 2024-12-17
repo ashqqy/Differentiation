@@ -36,6 +36,16 @@ void LatexOutput (FILE* output_file, tree_node_t* node)
 
         case OP:
         {
+            // if (node->data.content.operation == DIV)
+            // {
+            //     fprintf (output_file, "/frac{");
+            //     LatexOutput (output_file, node->left);
+            //     fprintf (output_file, "}{");
+            //     LatexOutput (output_file, node->right);
+            //     fprintf (output_file, "}");
+            //     break;
+            // }
+
             if ((node->left->data.type == OP) && (node->data.content.operation == DEG ||
                 ((node->data.content.operation == MUL) && ((node->left->data.content.operation == ADD) 
                 || (node->left->data.content.operation == SUB)))))

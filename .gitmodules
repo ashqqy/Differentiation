@@ -1,6 +1,3 @@
-[submodule "Stack"]
-	path = Stack
-	url = https://github.com/ashqqy/Stack
 [submodule "Custom-Assert"]
 	path = Custom-Assert
 	url = https://github.com/ashqqy/Custom-Assert/

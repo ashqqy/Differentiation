@@ -15,7 +15,7 @@ FLAGS = -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-loop
 all: build run
 
 build: 
-	g++ -I./Diff/include -I./Stack/include -I./Custom-Assert -I./My-Allocation -I./Common ./My-Allocation/*.cpp ./Common/Common.cpp ./Diff/src/*.cpp -o main $(FLAGS)
+	g++ -I./Diff/include -I./Custom-Assert -I./My-Allocation -I./Common ./My-Allocation/*.cpp ./Common/Common.cpp ./Diff/src/*.cpp -o main $(FLAGS)
 
 run: 
 	./main

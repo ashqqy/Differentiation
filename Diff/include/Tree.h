@@ -24,8 +24,8 @@ enum special_symb_t
 
 enum math_constant_t
 {
-    EXP = 101,
-    PI  = 960
+    EXP = 1,
+    PI  = 2
 };
 
 enum math_function_t
