@@ -7,6 +7,17 @@
 
 //--------------------------------------------------------------------------
 
+void LatexDoc (FILE* output_file, tree_node_t* node)
+{
+    CustomAssert (output_file != NULL);
+    CustomAssert (node        != NULL);
+
+    fprintf (output_file,
+    "\\documentclass{article}\n\n\\usepackage[english, russian]{babel}\n\n\\usepackage{amsmath}\n\\begin{document}\n\n$");
+    LatexOutput (output_file, node);
+    fprintf (output_file, "$\n\n\\end{document}\n");
+}
+
 void LatexOutput (FILE* output_file, tree_node_t* node)
 {
     CustomAssert (output_file != NULL);
@@ -18,13 +29,17 @@ void LatexOutput (FILE* output_file, tree_node_t* node)
     {
         case NUM:
         {
-            fprintf (output_file, "%lg", node->data.content.number);
+            if (node->data.content.number > 0)
+                fprintf (output_file, "%lg", node->data.content.number);
+            else 
+                fprintf (output_file, "(%lg)", node->data.content.number);
+
             break;
         }
         
         case CONST:
         {
-            fprintf (output_file, "%s", FindReservedName (&node->data));
+            fprintf (output_file, "%s", FindReservedNameByData (&node->data));
             break;
         }
 
@@ -36,15 +51,15 @@ void LatexOutput (FILE* output_file, tree_node_t* node)
 
         case OP:
         {
-            // if (node->data.content.operation == DIV)
-            // {
-            //     fprintf (output_file, "/frac{");
-            //     LatexOutput (output_file, node->left);
-            //     fprintf (output_file, "}{");
-            //     LatexOutput (output_file, node->right);
-            //     fprintf (output_file, "}");
-            //     break;
-            // }
+            if (node->data.content.operation == DIV)
+            {
+                fprintf (output_file, "\\frac{");
+                LatexOutput (output_file, node->left);
+                fprintf (output_file, "}{");
+                LatexOutput (output_file, node->right);
+                fprintf (output_file, "}");
+                break;
+            }
 
             if ((node->left->data.type == OP) && (node->data.content.operation == DEG ||
                 ((node->data.content.operation == MUL) && ((node->left->data.content.operation == ADD) 
@@ -59,15 +74,20 @@ void LatexOutput (FILE* output_file, tree_node_t* node)
 
             fprintf (output_file, "%c", node->data.content.operation);
 
-            if ((node->right->data.type == OP) && (node->data.content.operation == DEG ||
-                ((node->data.content.operation == MUL) && ((node->right->data.content.operation == ADD) 
-                || (node->right->data.content.operation == SUB)))))
+            if ((node->right->data.type == OP) && ((node->data.content.operation == MUL) && 
+                ((node->right->data.content.operation == ADD) || (node->right->data.content.operation == SUB))))
             {
                 fprintf (output_file, "(");
                 LatexOutput (output_file, node->right);
                 fprintf (output_file, ")");
             }
-            else 
+            else if (node->data.content.operation == DEG)
+            {
+                fprintf (output_file, "{");
+                LatexOutput (output_file, node->right);
+                fprintf (output_file, "}");
+            }
+            else
                 LatexOutput (output_file, node->right);
 
             break;
@@ -75,7 +95,7 @@ void LatexOutput (FILE* output_file, tree_node_t* node)
             
         case FUNC:
         {
-            fprintf (output_file, "%s(", FindReservedName (&node->data));
+            fprintf (output_file, "%s(", FindReservedNameByData (&node->data));
             LatexOutput (output_file, node->left);
             fprintf (output_file, ")");
             break;

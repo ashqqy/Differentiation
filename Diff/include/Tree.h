@@ -25,7 +25,17 @@ enum special_symb_t
 enum math_constant_t
 {
     EXP = 1,
-    PI  = 2
+    PI  = 2,
+    A = 3,
+    B = 4,
+    C = 5,
+    D = 6,
+    E = 7,
+    F = 8,
+    G = 9,
+    H = 10,
+    I = 11,
+    J = 12
 };
 
 enum math_function_t

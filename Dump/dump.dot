@@ -2,14 +2,24 @@ digraph G
 {
 node[shape="record", style="rounded, filled"];
 
-p0x5030000002e0[label = "{ <ptr> 0x5030000002e0 |<type> OP | <data>/| { <l>left|<r>right } }"];
-p0x5030000002b0[label = "{ <ptr> 0x5030000002b0 |<type> NUM | <data>-1.000000| { <l>left|<r>right } }"];
-p0x503000000160[label = "{ <ptr> 0x503000000160 |<type> OP | <data>*| { <l>left|<r>right } }"];
-p0x503000000130[label = "{ <ptr> 0x503000000130 |<type> VAR | <data>x| { <l>left|<r>right } }"];
+p0x503000000220[label = "{ <ptr> 0x503000000220 |<type> OP | <data>+| { <l>left|<r>right } }"];
+p0x5030000001c0[label = "{ <ptr> 0x5030000001c0 |<type> OP | <data>/| { <l>left|<r>right } }"];
+p0x503000000040[label = "{ <ptr> 0x503000000040 |<type> FUNC | <data>SIN| { <l>left|<r>right } }"];
+p0x5030000000d0[label = "{ <ptr> 0x5030000000d0 |<type> OP | <data>*| { <l>left|<r>right } }"];
+p0x5030000000a0[label = "{ <ptr> 0x5030000000a0 |<type> CONST | <data>| { <l>left|<r>right } }"];
+p0x503000000130[label = "{ <ptr> 0x503000000130 |<type> OP | <data>^| { <l>left|<r>right } }"];
 p0x503000000100[label = "{ <ptr> 0x503000000100 |<type> VAR | <data>x| { <l>left|<r>right } }"];
+p0x503000000160[label = "{ <ptr> 0x503000000160 |<type> NUM | <data>2.000000| { <l>left|<r>right } }"];
+p0x5030000001f0[label = "{ <ptr> 0x5030000001f0 |<type> CONST | <data>| { <l>left|<r>right } }"];
+p0x503000000250[label = "{ <ptr> 0x503000000250 |<type> CONST | <data>| { <l>left|<r>right } }"];
 
-p0x5030000002e0:<l> -> p0x5030000002b0
-p0x5030000002e0:<r> -> p0x503000000160
-p0x503000000160:<l> -> p0x503000000130
-p0x503000000160:<r> -> p0x503000000100
+p0x503000000220:<l> -> p0x5030000001c0
+p0x5030000001c0:<l> -> p0x503000000040
+p0x503000000040:<l> -> p0x5030000000d0
+p0x5030000000d0:<l> -> p0x5030000000a0
+p0x5030000000d0:<r> -> p0x503000000130
+p0x503000000130:<l> -> p0x503000000100
+p0x503000000130:<r> -> p0x503000000160
+p0x5030000001c0:<r> -> p0x5030000001f0
+p0x503000000220:<r> -> p0x503000000250
 }

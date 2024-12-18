@@ -4,6 +4,7 @@
 #include <ctype.h>
 
 #include "Tree.h"
+#include "Common.h"
 #include "Tokenization.h"
 #include "CustomAssert.h"
 #include "MyAllocation.h"
@@ -16,7 +17,7 @@
 
 //--------------------------------------------------------------------------
 
-int FindReservedData (const char* name, tree_data_t* data) // TODO rename
+int FindReservedDataByName (const char* name, tree_data_t* data)
 {
     CustomAssert (name != NULL);
     CustomAssert (data != NULL);
@@ -33,16 +34,20 @@ int FindReservedData (const char* name, tree_data_t* data) // TODO rename
     return -1;
 }
 
-const char* FindReservedName (tree_data_t* data) // TODO rename
+const char* FindReservedNameByData (tree_data_t* data)
 {
     CustomAssert (data != NULL);
 
     for (size_t i = 0; i < sizeof (reserved_names) / sizeof (reserved_names[0]); ++i)
     {
-        if ((data->type == reserved_names[i].data.type) && 
-            ((data->content.constant == reserved_names[i].data.content.constant) || 
-             (data->content.function == reserved_names[i].data.content.function)))
+        if ((data->type == reserved_names[i].data.type && data->type == CONST && 
+            data->content.constant == reserved_names[i].data.content.constant))
             return reserved_names[i].name;
+        
+        if ((data->type == reserved_names[i].data.type && data->type == FUNC &&
+            data->content.function == reserved_names[i].data.content.function))
+            return reserved_names[i].name;
+            
     }
 
     return "Not found";
@@ -77,11 +82,11 @@ tree_node_t** Tokenization (char* buffer, size_t buffer_size, int* shift)
         else if (isalpha(buffer[*shift]))
         {
             tree_data_t token_data = {};
-            char name[10] = "";
+            char name[100] = "";
             int n = 0;
             sscanf (buffer + *shift, "%[a-zA-Z]%n", name, &n);
 
-            if (FindReservedData (name, &token_data))
+            if (FindReservedDataByName (name, &token_data))
             {
                 if (n == 1)
                 {

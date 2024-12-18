@@ -155,7 +155,7 @@ tree_node_t* GetConst (tree_node_t** token_array, int* shift)
     CustomAssert (token_array != NULL);
     CustomAssert (shift       != NULL);  
 
-    tree_node_t* node = NULL; // FIXME ??????
+    tree_node_t* node = NULL;
     if (token_data_ (type) == CONST)
         node = token_array[*shift];
     else 
@@ -171,7 +171,7 @@ tree_node_t* GetVariable (tree_node_t** token_array, int* shift)
     CustomAssert (token_array != NULL);
     CustomAssert (shift       != NULL);
 
-    tree_node_t* node = NULL; // FIXME ??????
+    tree_node_t* node = NULL;
     if (token_data_ (type) == VAR)
         node = token_array[*shift];
     else 
@@ -187,7 +187,7 @@ tree_node_t* GetNumber (tree_node_t** token_array, int* shift)
     CustomAssert (token_array != NULL);
     CustomAssert (shift       != NULL);
 
-    tree_node_t* node = NULL; // FIXME ??????
+    tree_node_t* node = NULL;
     if (token_data_ (type) == NUM)
         node = token_array[*shift];
     else
@@ -197,5 +197,9 @@ tree_node_t* GetNumber (tree_node_t** token_array, int* shift)
 
     return node;
 }
+
+//--------------------------------------------------------------------------
+
+#undef token_data_
 
 //--------------------------------------------------------------------------

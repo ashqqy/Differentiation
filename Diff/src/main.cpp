@@ -14,8 +14,8 @@
 
 int main ()
 {
-    FILE* input_file  = fopen ("./Examples/Input",  "r");
-    FILE* output_file = fopen ("./Examples/Output", "w");
+    FILE* input_file  = fopen ("./Examples/Input",      "r");
+    FILE* output_file = fopen ("./Examples/Output.tex", "w");
 
     size_t input_size = 0;
     char* input_buffer = ReadFile (input_file, &input_size);
@@ -29,12 +29,12 @@ int main ()
 
     shift = 0;
     tree_node_t* root_node = GetG (token_array, &shift);
-
+    Simplify (root_node);
     tree_node_t* diff_root_node = Diff (root_node);
     Simplify (diff_root_node);
-    TreeDump (diff_root_node);
+    TreeDump (root_node);
 
-    LatexOutput (output_file, diff_root_node);
+    LatexDoc (output_file, diff_root_node);
 
     free (token_array); token_array = NULL;
     TreeDestroy (root_node);
