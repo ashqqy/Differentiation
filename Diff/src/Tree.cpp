@@ -145,8 +145,8 @@ void TreeNodeDescrDump (FILE* dump_file, tree_node_t* node)
         }
         case CONST:
         {
-            fprintf (dump_file, "p%p[label = \"{ <ptr> %p |<type> %s | <data>%c| { <l>left|<r>right } }\"];\n", 
-                                node, node, "CONST", node->data.content.constant); // DescribeMathConst (node->data.content.constant)
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p |<type> %s | <data>%s| { <l>left|<r>right } }\"];\n", 
+                                node, node, "CONST", DescribeMathConst (node->data.content.constant));
             break;
         }
         case SP_SYMB:
@@ -197,17 +197,17 @@ const char* DescribeMathFunc (math_function_t func_enum)
     #undef DESCR_
 }
 
-// const char* DescribeMathConst (math_constant_t const_enum)
-// {
-//     #define DESCR_(name) case name: return #name;
-//     switch (const_enum)
-//     {
-//         DESCR_(EXP);
-//         DESCR_(PI);
-//         default:
-//             return "not found";
-//     }
-//     #undef DESCR_
-// }
+const char* DescribeMathConst (math_constant_t const_enum)
+{
+    #define DESCR_(name) case name: return #name;
+    switch (const_enum)
+    {
+        DESCR_(EXP);
+        DESCR_(PI);
+        default:
+            return "not found";
+    }
+    #undef DESCR_
+}
 
-// //------------------------------------------------------
+//------------------------------------------------------
